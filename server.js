@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 // Import Routes
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes.js');
 
 const blogRoutes = require('./routes/blogRoutes.js');
 
@@ -51,92 +52,9 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 });
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use('/api/author', userRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/blogs', blogRoutes);
-
-
-// Route for admin signup (restricted)
-// Route for admin signup (No password encryption)
-app.post("/admin/signup", async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
-
-    // Store password as plain text (not recommended)
-    const adminUser = new User({
-      name,
-      email,
-      password, // No hashing applied
-      role: "admin",
-    });
-
-    await adminUser.save();
-
-    res.status(201).json({
-      message: "Admin account created successfully",
-      user: { id: adminUser._id, name: adminUser.name, email: adminUser.email, role: adminUser.role },
-    });
-  } catch (error) {
-    console.error("Admin Signup Error:", error);
-    res.status(500).json({ message: "Server error", error });
-  }
-});
-
-
-// Route for admin login
-// Route for admin login (No password encryption)
-app.post("/admin/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Check if email and password are provided
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
-    }
-
-    // Find the admin user by email
-    const adminUser = await User.findOne({ email, role: "admin" });
-    if (!adminUser) {
-      return res.status(404).json({ message: "Admin not found" });
-    }
-
-    // Directly compare the passwords without encryption
-    if (password !== adminUser.password) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    // Generate a JWT token for the admin
-    const token = jwt.sign(
-      { id: adminUser._id, role: adminUser.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    // Return admin details with the token
-    res.json({
-      message: "Admin login successful",
-      token,
-      user: {
-        id: adminUser._id,
-        name: adminUser.name,
-        email: adminUser.email,
-        role: adminUser.role,
-      },
-    });
-  } catch (error) {
-    console.error("Admin Login Error:", error);
-    res.status(500).json({ message: "Server error", error });
-  }
-});
-
 
 
 // Database Connection

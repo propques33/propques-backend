@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User.js");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const validateToken = require("../middleware/validateToken.js");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -141,69 +142,42 @@ router.post("/login", async (req, res) => {
 });
 
 // Route to validate token
-router.get("/validate", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+// router.get("/validate", async (req, res) => {
+//   const token = req.headers.authorization?.split(" ")[1];
 
-  if (!token) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Token is missing" });
-  }
+//   if (!token) {
+//     return res
+//       .status(401)
+//       .json({ success: false, message: "Token is missing" });
+//   }
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET); // Verify the token
-    const user = await User.findById(decoded.id).select("-password"); // Fetch user without password
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
+//     const user = await User.findById(decoded.id).select("-password"); // Fetch user without password
 
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found" });
+//     }
 
-    res.json({ success: true, message: "Token is valid", data: user });
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ success: false, message: "Token has expired" });
-    }
+//     res.json({ success: true, message: "Token is valid", data: user });
+//   } catch (error) {
+//     if (error.name === "TokenExpiredError") {
+//       return res
+//         .status(401)
+//         .json({ success: false, message: "Token has expired" });
+//     }
 
-    console.error("Token validation error:", error);
-    res.status(401).json({ success: false, message: "Invalid token" });
-  }
-});
+//     console.error("Token validation error:", error);
+//     res.status(401).json({ success: false, message: "Invalid token" });
+//   }
+// });
+
+
 
 // Route to approve or reject authors
-router.post("/approve/:id", verifyToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Check if user role is already assigned
-    if (user.role !== "pending")
-      return res
-        .status(400)
-        .json({ message: "User already approved or rejected" });
-
-    const { approved } = req.body;
-    user.role = approved ? "author" : "rejected";
-    await user.save();
-
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Route to fetch pending users
-router.get("/pending", verifyToken, async (req, res) => {
-  try {
-    const pendingUsers = await User.find({ role: "pending" });
-    res.json(pendingUsers);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 module.exports = router;
   
