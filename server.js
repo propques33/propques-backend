@@ -17,17 +17,24 @@ const blogRoutes = require('./routes/blogRoutes.js');
 const app = express();
 
 // Middleware
-app.use(bodyParser.json());
-// app.use(express.json());
 
+
+
+// Allow all origins (for development)
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:8080'], // Allow React frontend
-  methods: 'GET,POST,PUT,DELETE,PATCH,HEAD',
-  credentials: true,
+    origin: '*', // Allows all origins
+    credentials: true, // Allow cookies & auth headers
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH' ], // Allowed methods
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 }));
 
 // Serve static files from the uploads directory
 app.use(express.static(path.join(__dirname, 'uploads')));
+
+
+// Increase body size limit
+app.use(bodyParser.json({ limit: '50mb' })); // Adjust limit as needed
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // File upload configuration
 const storage = multer.diskStorage({
