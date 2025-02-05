@@ -94,9 +94,9 @@ router.get('/', async (req, res) => {
 });
 
 // // Get a Specific Blog by ID
-router.get("/:id", async (req, res) => {
+router.get("/:slug", async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id).populate(
+    const blog = await Blog.findOne({ slug: req.params.slug }).populate(
       "authors",
       "name email"
     );
@@ -110,6 +110,7 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Toggle Visibility
 router.patch("/:id/visibility", async (req, res) => {
