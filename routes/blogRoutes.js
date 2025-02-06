@@ -111,6 +111,29 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
+// Update a blog by slug or ID
+router.put("/:slug", async (req, res) => {
+  try {
+    const { title, description, coverImage, authors, readingTime, visibility } = req.body;
+
+    // Find blog by slug and update it
+    const updatedBlog = await Blog.findOneAndUpdate(
+      { slug: req.params.slug }, // Find by slug
+      { title, description, coverImage, authors, readingTime, visibility }, // Updated fields
+      { new: true, runValidators: true } // Return updated doc and validate
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.json({ message: "Blog updated successfully", blog: updatedBlog });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+ 
+
 
 // Toggle Visibility
 router.patch("/:id/visibility", async (req, res) => {
