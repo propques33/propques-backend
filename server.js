@@ -11,6 +11,7 @@ const bcrypt = require("bcryptjs");
 // Import Routes
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes.js');
+const Pincode = require('./models/Pincode.js');
 
 const blogRoutes = require('./routes/blogRoutes.js');
 
@@ -58,10 +59,27 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   }
 });
 
+
+
+app.get("/api/pincode/:pincode", async (req, res) => {
+  try {
+    const { pincode } = req.params;
+    const result = await Pincode.find({
+      pincode: new RegExp(`^${pincode}`, "i"),
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching data" });
+  }
+});
+
 // Routes
 app.use('/api/author', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/blogs', blogRoutes);
+
+
+
 
 
 // Database Connection
