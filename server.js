@@ -79,6 +79,28 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/blogs', blogRoutes);
 
 
+app.post("/api/salesmate", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const response = await axios.post(
+      "https://propquesservices.salesmate.io/apis/contact/v4",
+      { email },
+      {
+        headers: {
+          accessToken: "e55130c0-d0b7-11ee-9435-517682d0b702",
+          secretKey: "e55130c1-d0b7-11ee-9435-517682d0b702",
+          sessionToken: "39c4c1b0-e513-11ef-a130-b9ebcf59a1ef",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 
 
 
